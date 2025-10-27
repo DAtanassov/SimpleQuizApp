@@ -1,0 +1,28 @@
+﻿@model SimpleQuizApp.Models.ViewModels.SelectQuizViewModel
+
+@{
+	ViewData["Title"] = "Choise a Quiz";
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+	<div class="alert alert-danger" role="alert"> @TempData["ErrorMessage"] </div>
+}
+@if (TempData["SuccessMessage"] != null)
+{
+	<div class="alert alert-success" role="alert"> @TempData["SuccessMessage"] </div>
+}
+@if (!Model.Quizzes.Any())
+{
+	<div class="alert alert-info" role="alert"> No quizzes have been added yet. </div>
+}
+else
+{
+
+	<form asp-controller="Quiz" asp-action="Index" method="post"> <h2 class="mb-3">Choise a Quiz</h2> <hr /> @for (var i = 0; i < Model.Quizzes.Count; i++) {
+	<ol> <input required type="radio" value="@Model.Quizzes[i].Id" name="Id" /> @Model.Quizzes[i].QuizName </ol>
+}
+ <hr /> <button type="submit" class="btn btn-primary btn-sm">Start Quiz</button> </form>
+}
+<br />
+<form enctype="multipart/form-data" method="post"> <div class="input-group mb-3"> <input type="file" name="file" class="form-control" accept=".json" /> <button class="btn btn-success btn-sm" type="submit" asp-controller="Home" asp-action="Index">Upload more quizzes</button> </div> </form>

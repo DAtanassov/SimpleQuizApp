@@ -1,0 +1,18 @@
+﻿<h2>Quiz completed</h2>
+<hr />
+<p>Questions @ViewBag.totalQuestions</p>
+<p>Correct answers @ViewBag.CorrectAnswers</p>
+<p>Score @ViewBag.Score / 100</p>
+
+@if (ViewBag.Graded)
+{
+	<div class="alert alert-success" role="alert"> <h3>Great job!</h3> </div>
+}
+else
+{
+	<div class="alert alert-danger" role="alert"> <h3>Try again!</h3> </div>
+}
+<hr />
+<div>
+	<a asp-controller="Home" asp-action="Index" class="btn btn-primary btn-sm">Take another Quiz</a>
+</div>
