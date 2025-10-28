@@ -22,24 +22,23 @@ namespace SimpleQuizApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SubmitQuiz(List<Guid> userAnswers)
+        public async Task<IActionResult> SubmitQuiz(List<Guid> userAnswers, Guid QuizId)
         {
-            Guid[] IDs = await _context.Answers
-                                .Where(a => userAnswers.Contains(a.Id))
-                                .Select(a => a.QuestionId)
-                                .ToArrayAsync();
+            List<Question?> questions = await _context.QuizQuestions
+                                            .Include(q => q.Question)
+                                            .Where(q => q.QuizId == QuizId)
+                                            .Select(q => q.Question)
+                                            .ToListAsync();
 
-            List<Question> questions = await _context.Questions.Where(q => IDs.Contains(q.Id)).ToListAsync();
             var totalQuestions = questions.Count;
             var correctAnswers = questions.Where(q => userAnswers.Contains(q.CorrectAnswer)).Count();
-            
             int score = (int)(100 * ((double)correctAnswers / (double)totalQuestions));
-            bool graded = (score >= 85);
 
             ViewBag.TotalQuestions = totalQuestions;
             ViewBag.CorrectAnswers = correctAnswers;
+            ViewBag.Answers = userAnswers.Count();
             ViewBag.Score = score;
-            ViewBag.Graded = graded;
+            ViewBag.Graded = (score >= 75);
 
             return View(nameof(Results));
         }

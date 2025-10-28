@@ -1,3 +1,5 @@
 .vs
+.config
 bin
 obj
+Properties/PublishProfiles

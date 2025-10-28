@@ -1,18 +1,52 @@
-﻿<h2>Quiz completed</h2>
-<hr />
-<p>Questions @ViewBag.totalQuestions</p>
-<p>Correct answers @ViewBag.CorrectAnswers</p>
-<p>Score @ViewBag.Score / 100</p>
+﻿@{
+    ViewData["Title"] = "Quiz Completed";
+}
 
-@if (ViewBag.Graded)
-{
-	<div class="alert alert-success" role="alert"> <h3>Great job!</h3> </div>
-}
-else
-{
-	<div class="alert alert-danger" role="alert"> <h3>Try again!</h3> </div>
-}
-<hr />
-<div>
-	<a asp-controller="Home" asp-action="Index" class="btn btn-primary btn-sm">Take another Quiz</a>
+<div class="container py-5 text-center">
+
+    <div class="card shadow-lg border-0 mx-auto" style="max-width: 600px;">
+        <div class="card-body">
+            <h2 class="mb-4 text-primary fw-bold">Quiz Completed</h2>
+            <hr />
+
+            <div class="row justify-content-center text-start mb-4">
+                <div class="col-10 col-md-8">
+                    <ul class="list-group list-group-flush fs-5">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Total Questions:</span>
+                            <span class="fw-bold">@ViewBag.TotalQuestions</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Answers:</span>
+                            <span class="fw-bold text-info">@ViewBag.Answers</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Correct Answers:</span>
+                            <span class="fw-bold text-success">@ViewBag.CorrectAnswers</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Score:</span>
+                            <span class="fw-bold">@ViewBag.Score / 100</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            @if (ViewBag.Graded)
+            {
+                <div class="alert alert-success fw-bold fs-5" role="alert">Great job! You nailed it!</div>
+            }
+            else
+            {
+                <div class="alert alert-danger fw-bold fs-5" role="alert">Try again — you can do better next time!</div>
+            }
+
+            <hr />
+
+            <div class="mt-4">
+                <a asp-controller="Home" asp-action="Index" class="btn btn-primary btn-sm px-4">Take Another Quiz</a>
+            </div>
+        </div>
+    </div>
+
 </div>
