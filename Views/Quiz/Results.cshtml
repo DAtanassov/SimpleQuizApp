@@ -1,52 +1,64 @@
 ﻿@{
-    ViewData["Title"] = "Quiz Completed";
+	ViewData["Title"] = "Quiz Completed";
 }
 
-<div class="container py-5 text-center">
+<div class="container py-5">
+	<div class="row justify-content-center">
+		<div class="col-md-9 col-lg-7">
 
-    <div class="card shadow-lg border-0 mx-auto" style="max-width: 600px;">
-        <div class="card-body">
-            <h2 class="mb-4 text-primary fw-bold">Quiz Completed</h2>
-            <hr />
+			@* Quiz Result content *@
+			<div class="card shadow-lg border-0">
+				<div class="card-body text-center p-4">
+					<h2 class="mb-4 text-primary fw-bold">Quiz Completed</h2>
+					<hr />
 
-            <div class="row justify-content-center text-start mb-4">
-                <div class="col-10 col-md-8">
-                    <ul class="list-group list-group-flush fs-5">
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span>Total Questions:</span>
-                            <span class="fw-bold">@ViewBag.TotalQuestions</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span>Answers:</span>
-                            <span class="fw-bold text-info">@ViewBag.Answers</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span>Correct Answers:</span>
-                            <span class="fw-bold text-success">@ViewBag.CorrectAnswers</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span>Score:</span>
-                            <span class="fw-bold">@ViewBag.Score / 100</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+					<ul class="list-group list-group-flush fs-5">
+						<li class="list-group-item d-flex justify-content-between">
+							<span>Total Questions:</span>
+							<span class="fw-bold">@ViewBag.TotalQuestions</span>
+						</li>
+						<li class="list-group-item d-flex justify-content-between">
+							<span>Answers:</span>
+							<span class="fw-bold text-info">@ViewBag.Answers</span>
+						</li>
+						<li class="list-group-item d-flex justify-content-between">
+							<span>Correct Answers:</span>
+							<span class="fw-bold text-success">@ViewBag.CorrectAnswers</span>
+						</li>
+						<li class="list-group-item d-flex justify-content-between">
+							<span>Score:</span>
+							<span class="fw-bold">@ViewBag.Score / 100</span>
+						</li>
+					</ul>
 
-            @if (ViewBag.Graded)
-            {
-                <div class="alert alert-success fw-bold fs-5" role="alert">Great job! You nailed it!</div>
-            }
-            else
-            {
-                <div class="alert alert-danger fw-bold fs-5" role="alert">Try again — you can do better next time!</div>
-            }
+					<hr />
+				</div>
+				<div class="card-body p-4">
+					<div class="text-center mb-4">
+						
+						@* Quiz Info - Graded or Not *@
+						@if (ViewBag.Graded)
+						{
+							<div class="alert alert-success fw-bold fs-5" role="alert">
+								Great job! You nailed it!
+							</div>
+						}
+						else
+						{
+							<div class="alert alert-danger fw-bold fs-5" role="alert">
+								Try again — you can do better next time!
+								<h6 class="text-muted">You must have at least 75 points to pass the test successfully.</h6>
+							</div>
+						}
+					</div>
+					<hr />
 
-            <hr />
+					<div class="text-center mt-4">
+						<a asp-controller="Home" asp-action="Index" class="btn btn-primary btn-sm px-4">Take Another Quiz</a>
+					</div>
+				</div>
+			</div>
 
-            <div class="mt-4">
-                <a asp-controller="Home" asp-action="Index" class="btn btn-primary btn-sm px-4">Take Another Quiz</a>
-            </div>
-        </div>
-    </div>
-
+		</div>
+	</div>
 </div>
