@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -60,6 +61,51 @@ namespace SimpleQuizApp.Controllers
             }
 
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        public IActionResult DownloadSampleJson()
+        {
+            List<ImportQuizModel> list = new List<ImportQuizModel>()
+            { 
+                new ImportQuizModel()
+                {
+                    name = "Sample Quiz",
+                    questions = new List<ImportQuestionModel>()
+                    {
+                        new ImportQuestionModel()
+                        {
+                            questionText = "What is the capital of France?",
+                            correctAnswer = "A",
+                            answers = new ImportAnswerModel()
+                            {
+                                A = "Paris",
+                                B = "London",
+                                C = "Berlin",
+                                D = "Moscow"
+                            }
+                        },
+                        new ImportQuestionModel()
+                        {
+                            questionText = "Which planet is known as the Red Planet?",
+                            correctAnswer = "B",
+                            answers = new ImportAnswerModel()
+                            {
+                                A = "Venus",
+                                B = "Mars",
+                                C = "Jupiter",
+                                D = "Earth"
+                            }
+                        }
+                    }
+                }
+            };
+
+            var json = JsonSerializer.Serialize(list, new JsonSerializerOptions { WriteIndented = true });
+            var bytes = Encoding.UTF8.GetBytes(json);
+            var fileName = "sampleQuiz.json";
+
+            return File(bytes, "application/json", fileName);
         }
 
         private async Task<List<QuizViewModelItem>> GetQuizzes()
