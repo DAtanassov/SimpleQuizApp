@@ -3,8 +3,19 @@ using SimpleQuizApp.Models;
 
 namespace SimpleQuizApp.Data
 {
+    /// <summary>
+    /// Provides database seeding functionality
+    /// This class initializes the database with default quizzes and questions
+    /// during application startup if no data currently exists.
+    /// </summary>
     public class AppDbInitializer
     {
+        /// <summary>
+        /// Seeds the application database with initial data if it is empty.
+        /// </summary>
+        /// <param name="applicationBuilder">
+        /// The <see cref="IApplicationBuilder"/> used to access application services
+        /// </param>
         public static void Seed(IApplicationBuilder applicationBuilder)
         {
             using (var serviceScope = applicationBuilder.ApplicationServices.CreateScope())
@@ -13,11 +24,15 @@ namespace SimpleQuizApp.Data
                 var _context = services.GetService<AppDbContext>()!;
                 var env = services.GetRequiredService<IWebHostEnvironment>();
 
+                // Ensure the database exists before seeding
                 _context.Database.EnsureCreated();
 
+                // Only seed data if no questions exist
                 if (!_context.Questions.Any())
                 {
+                    // Path to the initial JSON data file
                     var filePath = Path.Combine(env.ContentRootPath, "JSONfiles", "InitialQuestions.json");
+
                     if (File.Exists(filePath))
                     {
                         string _questions = File.ReadAllText(filePath);
@@ -37,6 +52,7 @@ namespace SimpleQuizApp.Data
 
                         if (questions.Count > 0)
                         {
+                            // Create several sample quizzes
                             List<Quiz> quizzes = new List<Quiz>();
                             quizzes.Add(new Quiz()
                             {
@@ -54,13 +70,16 @@ namespace SimpleQuizApp.Data
                                 Name = "Случайно генериран тест 3"
                             });
 
+                            // Create relationships between quizzes and random questions
                             List<QuizQuestions> quiz_questions = new List<QuizQuestions>();
                             Random rand = new Random();
                             int n = questions.Count();
+                            
                             for (int i = 0; i < quizzes.Count; i++)
                             {
                                 _context.RandomizeAnswers(questions, rand);
 
+                                // Select a random number of questions per quiz (between 5 and 10)
                                 int r = rand.Next(Math.Min(5, n), Math.Min(10, n));
                                 var quiz = quizzes[i];
 
@@ -75,6 +94,7 @@ namespace SimpleQuizApp.Data
                                 }
                             }
 
+                            // Save all seeded entities to the database
                             _context.Questions.AddRange(questions);
                             _context.Quizzes.AddRange(quizzes);
                             _context.QuizQuestions.AddRange(quiz_questions);
@@ -85,7 +105,5 @@ namespace SimpleQuizApp.Data
                 }
             }
         }
-
-
     }
 }

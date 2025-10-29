@@ -6,20 +6,35 @@ using SimpleQuizApp.Data;
 using SimpleQuizApp.Models;
 using SimpleQuizApp.Models.ViewModels;
 
-
 namespace SimpleQuizApp.Controllers
 {
+    /// <summary>
+    /// Main controller responsible for handling the home page,
+    /// choosing a quiz to solve, quiz import functionality,
+    /// and sample JSON export.
+    /// </summary>
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
         private readonly AppDbContext _context;
 
-        public HomeController(ILogger<HomeController> logger, AppDbContext context, IWebHostEnvironment webHost)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HomeController"/> class.
+        /// </summary>
+        /// <param name="logger">Logger used for diagnostic and error logging.</param>
+        /// <param name="context">Database context for accessing quizzes.</param>
+        public HomeController(ILogger<HomeController> logger, AppDbContext context)
         {
             _logger = logger;
             _context = context;
         }
 
+        /// <summary>
+        /// Displays the home page with the list of available quizzes.
+        /// </summary>
+        /// <returns>
+        /// A view displaying all quizzes available in the database.
+        /// </returns>
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -27,6 +42,14 @@ namespace SimpleQuizApp.Controllers
             return View(new SelectQuizViewModel { Quizzes = quizzes });
         }
 
+        /// <summary>
+        /// Handles the upload of a JSON file containing quizzes.
+        /// Validates and imports the quizzes into the database.
+        /// </summary>
+        /// <param name="file">Uploaded JSON file containing quiz definitions.</param>
+        /// <returns>
+        /// Redirects back to the Index page with a success or error message.
+        /// </returns>
         [HttpPost]
         public async Task<IActionResult> Index(IFormFile file)
         {
@@ -63,6 +86,13 @@ namespace SimpleQuizApp.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        /// <summary>
+        /// Generates and returns a downloadable sample JSON file
+        /// that users can use as a template for creating new quizzes.
+        /// </summary>
+        /// <returns>
+        /// A JSON file (<c>application/json</c>) named <c>sampleQuiz.json</c>.
+        /// </returns>
         [HttpGet]
         public IActionResult DownloadSampleJson()
         {
@@ -108,6 +138,13 @@ namespace SimpleQuizApp.Controllers
             return File(bytes, "application/json", fileName);
         }
 
+        /// <summary>
+        /// Retrieves all quizzes from the database and maps them
+        /// into a view model suitable for displaying in the view.
+        /// </summary>
+        /// <returns>
+        /// A list of <see cref="QuizViewModelItem"/> representing available quizzes.
+        /// </returns>
         private async Task<List<QuizViewModelItem>> GetQuizzes()
         {
             List<QuizViewModelItem> quizzes = await _context.Quizzes
