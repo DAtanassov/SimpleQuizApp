@@ -1,51 +1,33 @@
-﻿using Microsoft.EntityFrameworkCore;
-using SimpleQuizApp.Models;
+﻿using SimpleQuizApp.Models;
 
-namespace SimpleQuizApp.Data
+namespace SimpleQuizApp.Services
 {
     /// <summary>
-    /// Represents the main Entity Framework Core database context
+    /// The <see cref="MemoryStore"/> class serves as an in-memory data store 
+    /// for quizzes, questions, answers, and their relationships.
     /// </summary>
-    /// <param name="options">The options used to configure the database context.</param>
-    public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+    public class MemoryStore
     {
         /// <summary>
-        /// Collection of quizzes stored in the database.
+        /// A collection of all available quizzes (<see cref="Quiz"/>)
+        /// stored in memory
         /// </summary>
-        public DbSet<Quiz> Quizzes { get; set; }
+        public required List<Quiz> Quizzes { get; set; } = [];
         /// <summary>
-        /// Collection of questions stored in the database.
+        /// A collection of all questions (<see cref="Question"/>) 
+        /// used in the quizzes stored in memory
         /// </summary>
-        public DbSet<Question> Questions { get; set; }
+        public required List<Question> Questions { get; set; } = [];
         /// <summary>
-        /// Collection of answers stored in the database.
+        /// A collection of all possible answers (<see cref="Answer"/>)
+        /// associated with the questions stored in memory
         /// </summary>
-        public DbSet<Answer> Answers { get; set; }
+        public required List<Answer> Answers { get; set; } = [];
         /// <summary>
-        /// Collection representing the many-to-many relationship
-        /// between quizzes and questions.
+        /// A mapping between quizzes and their corresponding questions,
+        /// represented by <see cref="QuizQuestions"/> objects 
         /// </summary>
-        public DbSet<QuizQuestions> QuizQuestions { get; set; }
-
-        /// <summary>
-        /// Configures the model relationships and database schema when the model is created.
-        /// </summary>
-        /// <param name="modelBuilder">Provides a simple API for configuring EF Core models.</param>
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-
-            modelBuilder.Entity<QuizQuestions>()
-                .HasOne(q => q.Quiz)
-                .WithMany(qq => qq.QuizQuestions)
-                .HasForeignKey(q => q.QuizId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<QuizQuestions>()
-                .HasOne(q => q.Question)
-                .WithMany(qq => qq.QuizQuestions)
-                .HasForeignKey(q => q.QuestionId)
-                .OnDelete(DeleteBehavior.Cascade);
-        }
+        public required List<QuizQuestions> QuizQuestions { get; set; } = [];
 
         /// <summary>
         /// Randomizes the order of elements in a given list using the Fisher–Yates shuffle algorithm.
@@ -67,30 +49,38 @@ namespace SimpleQuizApp.Data
         /// Imports quizzes and related data (questions and answers) from a collection of <see cref="ImportQuizModel"/> objects.
         /// This method creates new quiz, question, and quiz-question records and saves them to the database.
         /// </summary>
-        /// <param name="list">List of quizzes to be imported from JSON or another source.</param>
-        public void ImportQuizzes(List<ImportQuizModel> list)
+        /// <param name="listForImport">List of quizzes to be imported from JSON or another source.</param>
+        public void ImportQuizzes(List<ImportQuizModel> listForImport)
         {
-            List<Quiz> quizzes = new List<Quiz>();
-            List<Question> questions = new List<Question>();
-            List<QuizQuestions> quizQuestions = new List<QuizQuestions>();
+            List<Quiz> listQuizzes = new List<Quiz>();
+            List<Question> listQuestions = new List<Question>();
+            List<QuizQuestions> listQuizQuestions = new List<QuizQuestions>();
 
-            foreach (var quiz in list)
+            foreach (var quiz in listForImport)
             {
                 Quiz newQuiz = new Quiz() { Id = Guid.NewGuid(), Name = quiz.name };
 
                 List<Question> newQuestions = GetImportQuestions(quiz.questions);
                 foreach (Question newQuestion in newQuestions)
                 {
-                    questions.Add(newQuestion);
-                    quizQuestions.Add(new QuizQuestions() { Id = Guid.NewGuid(), QuizId = newQuiz.Id, QuestionId = newQuestion.Id });
+                    listQuestions.Add(newQuestion);
+                    listQuizQuestions.Add(new QuizQuestions() { Id = Guid.NewGuid(), QuizId = newQuiz.Id, QuestionId = newQuestion.Id });
                 }
-                quizzes.Add(newQuiz);
+                listQuizzes.Add(newQuiz);
             }
-            Quizzes.AddRangeAsync(quizzes);
-            Questions.AddRangeAsync(questions);
-            QuizQuestions.AddRangeAsync(quizQuestions);
+            foreach (var quiz in listQuizzes)
+                Quizzes.Add(quiz);
 
-            SaveChangesAsync();
+            foreach (var question in listQuestions)
+            {
+                Questions.Add(question);
+                foreach (var answer in question.Answers)
+                    Answers.Add(answer);
+            }
+
+            foreach (var qq in listQuizQuestions)
+                QuizQuestions.Add(qq);
+
         }
 
         /// <summary>
@@ -101,7 +91,6 @@ namespace SimpleQuizApp.Data
         /// <returns>
         /// A list of <see cref="Question"/> entities with associated answers and correct answer references.
         /// </returns>
-
         public List<Question> GetImportQuestions(List<ImportQuestionModel> importQuestions)
         {
             List<Question> questions = new List<Question>();

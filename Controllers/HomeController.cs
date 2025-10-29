@@ -1,29 +1,30 @@
 using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using SimpleQuizApp.Data;
 using SimpleQuizApp.Models;
 using SimpleQuizApp.Models.ViewModels;
+using SimpleQuizApp.Services;
 
 namespace SimpleQuizApp.Controllers
 {
     /// <summary>
     /// Main controller responsible for handling the home page,
     /// choosing a quiz to solve, quiz import functionality,
-    /// and sample JSON export.
+    /// and sample JSON export
     /// </summary>
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly AppDbContext _context;
+        private readonly MemoryStore _context;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HomeController"/> class.
         /// </summary>
-        /// <param name="logger">Logger used for diagnostic and error logging.</param>
-        /// <param name="context">Database context for accessing quizzes.</param>
-        public HomeController(ILogger<HomeController> logger, AppDbContext context)
+        /// <param name="logger">Logger used for diagnostic and error logging</param>
+        /// <param name="context">
+        /// The <see cref="MemoryStore"/> instance providing access to in-memory 
+        /// quiz, question, and answer data</param>
+        public HomeController(ILogger<HomeController> logger, MemoryStore context)
         {
             _logger = logger;
             _context = context;
@@ -36,19 +37,19 @@ namespace SimpleQuizApp.Controllers
         /// A view displaying all quizzes available in the database.
         /// </returns>
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            List<QuizViewModelItem> quizzes = await GetQuizzes();
+            List<QuizViewModelItem> quizzes = GetQuizzes();
             return View(new SelectQuizViewModel { Quizzes = quizzes });
         }
 
         /// <summary>
-        /// Handles the upload of a JSON file containing quizzes.
-        /// Validates and imports the quizzes into the database.
+        /// Handles the upload of a JSON file containing quizzes
+        /// Validates and imports the quizzes into the database
         /// </summary>
-        /// <param name="file">Uploaded JSON file containing quiz definitions.</param>
+        /// <param name="file">Uploaded JSON file containing quiz definitions</param>
         /// <returns>
-        /// Redirects back to the Index page with a success or error message.
+        /// Redirects back to the Index page with a success or error message
         /// </returns>
         [HttpPost]
         public async Task<IActionResult> Index(IFormFile file)
@@ -145,15 +146,15 @@ namespace SimpleQuizApp.Controllers
         /// <returns>
         /// A list of <see cref="QuizViewModelItem"/> representing available quizzes.
         /// </returns>
-        private async Task<List<QuizViewModelItem>> GetQuizzes()
+        private List<QuizViewModelItem> GetQuizzes()
         {
-            List<QuizViewModelItem> quizzes = await _context.Quizzes
+            List<QuizViewModelItem> quizzes = _context.Quizzes
                                     .Select(q => new QuizViewModelItem()
                                     {
                                         Id = q.Id,
                                         Selected = false,
                                         QuizName = q.Name
-                                    }).ToListAsync();
+                                    }).ToList();
             return quizzes;
         }
 

@@ -1,5 +1,5 @@
-using Microsoft.EntityFrameworkCore;
 using SimpleQuizApp.Data;
+using SimpleQuizApp.Services;
 
 namespace SimpleQuizApp
 {
@@ -11,13 +11,24 @@ namespace SimpleQuizApp
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
-            
-            var connectionString = builder.Configuration.GetConnectionString("TestDb")!;
-            builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseInMemoryDatabase(connectionString));
+
+            /// <summary>
+            /// Registers the <see cref="MemoryStore"/> class as a singleton service in the 
+            /// dependency injection container.
+            /// This ensures that a single shared instance of <see cref="MemoryStore"/> 
+            /// is used throughout the application lifetime, maintaining consistent 
+            /// in-memory data across requests
+            /// </summary>
+            builder.Services.AddSingleton<MemoryStore>();
 
             var app = builder.Build();
-            
+
+            /// <summary>
+            /// Calls the <see cref="AppDbInitializer.Seed(IApplicationBuilder)"/> method 
+            /// to populate the application's data store with initial data
+            /// </summary>
+            AppDbInitializer.Seed(app);
+
             app.UseHttpsRedirection();
             app.UseRouting();
 
@@ -28,8 +39,6 @@ namespace SimpleQuizApp
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}")
                 .WithStaticAssets();
-
-            AppDbInitializer.Seed(app);
 
             app.Run();
         }

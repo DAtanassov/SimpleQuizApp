@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using SimpleQuizApp.Data;
 using SimpleQuizApp.Models;
 using SimpleQuizApp.Models.ViewModels;
+using SimpleQuizApp.Services;
 
 namespace SimpleQuizApp.Controllers
 {
@@ -12,13 +11,15 @@ namespace SimpleQuizApp.Controllers
     /// </summary>
     public class QuizController : Controller
     {
-        private readonly AppDbContext _context;
-        
+        private readonly MemoryStore _context;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="QuizController"/> class.
         /// </summary>
-        /// <param name="context">Database context used to access quizzes, questions, and answers.</param>
-        public QuizController(AppDbContext context)
+        /// <param name="context">
+        /// The <see cref="MemoryStore"/> instance providing access to in-memory 
+        /// quiz, question, and answer data</param>
+        public QuizController(MemoryStore context)//AppDbContext context)
         {
             _context = context;
         }
@@ -30,9 +31,9 @@ namespace SimpleQuizApp.Controllers
         /// <returns>
         /// A view containing the quiz questions and related data.
         /// </returns>
-        public async Task<IActionResult> Index(Guid Id)
+        public IActionResult Index(Guid Id)
         {
-            List<QuestionViewModel> questions = await GetQuestionsByQuizId(Id);
+            List<QuestionViewModel> questions = GetQuestionsByQuizId(Id);
             return View(new QuizViewModel() { QuizId = Id, Questions = questions });
         }
 
@@ -46,13 +47,12 @@ namespace SimpleQuizApp.Controllers
         /// The <see cref="Results"/> view containing the user's score and performance details.
         /// </returns>
         [HttpPost]
-        public async Task<IActionResult> SubmitQuiz(List<Guid> userAnswers, Guid QuizId)
+        public IActionResult SubmitQuiz(List<Guid> userAnswers, Guid QuizId)
         {
-            List<Question?> questions = await _context.QuizQuestions
-                                            .Include(q => q.Question)
-                                            .Where(q => q.QuizId == QuizId)
-                                            .Select(q => q.Question)
-                                            .ToListAsync();
+            List<Question> questions = (from qq in _context.QuizQuestions
+                                        join q in _context.Questions on qq.QuestionId equals q.Id
+                                        where qq.QuizId == QuizId
+                                        select q).ToList();
 
             var totalQuestions = questions.Count;
             var correctAnswers = questions.Where(q => userAnswers.Contains(q.CorrectAnswer)).Count();
@@ -87,16 +87,15 @@ namespace SimpleQuizApp.Controllers
         /// <returns>
         /// A list of <see cref="QuestionViewModel"/> objects representing randomized quiz questions.
         /// </returns>
-        private async Task<List<QuestionViewModel>> GetQuestionsByQuizId(Guid Id)
+        private List<QuestionViewModel> GetQuestionsByQuizId(Guid Id)
         {
-            Guid[] qIDs = await _context.QuizQuestions
+            Guid[] qIDs = _context.QuizQuestions
                                         .Where(q => q.QuizId == Id)
                                         .Select(q => q.QuestionId)
-                                        .ToArrayAsync();
+                                        .ToArray();
 
-            List<QuestionViewModel> questions = await _context.Questions
+            List<QuestionViewModel> questions = _context.Questions
                                         .Where(q => qIDs.Contains(q.Id))
-                                        .Include(q => q.Answers)
                                         .Select(q => new QuestionViewModel()
                                         {
                                             Id = q.Id,
@@ -110,8 +109,8 @@ namespace SimpleQuizApp.Controllers
                                                             QuestionViewModelId = q.Id,
                                                             Option = null
                                                         }).ToList()
-                                        }).ToListAsync();
-            
+                                        }).ToList();
+
             // Randomize question and answer order
             Random rand = new Random();
             _context.RandomizeAnswers(questions, rand);

@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using SimpleQuizApp.Models;
+using SimpleQuizApp.Services;
 
 namespace SimpleQuizApp.Data
 {
@@ -21,11 +22,8 @@ namespace SimpleQuizApp.Data
             using (var serviceScope = applicationBuilder.ApplicationServices.CreateScope())
             {
                 var services = serviceScope.ServiceProvider;
-                var _context = services.GetService<AppDbContext>()!;
+                var _context = services.GetService<MemoryStore>()!;
                 var env = services.GetRequiredService<IWebHostEnvironment>();
-
-                // Ensure the database exists before seeding
-                _context.Database.EnsureCreated();
 
                 // Only seed data if no questions exist
                 if (!_context.Questions.Any())
@@ -94,12 +92,19 @@ namespace SimpleQuizApp.Data
                                 }
                             }
 
-                            // Save all seeded entities to the database
-                            _context.Questions.AddRange(questions);
-                            _context.Quizzes.AddRange(quizzes);
-                            _context.QuizQuestions.AddRange(quiz_questions);
+                            // Save all seeded entities to the in-memory data store
+                            foreach (var quiz in quizzes)
+                                _context.Quizzes.Add(quiz);
 
-                            _context.SaveChanges();
+                            foreach (var question in questions)
+                            {
+                                _context.Questions.Add(question);
+                                foreach (var answer in question.Answers)
+                                    _context.Answers.Add(answer);
+                            }
+
+                            foreach (var qq in quiz_questions)
+                                _context.QuizQuestions.Add(qq);
                         }
                     }
                 }
