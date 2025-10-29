@@ -22,7 +22,7 @@
 When opening in a web browser the address where the application is published
 		or launched through Visual Studio, the home page with Quizzes opens
 
-![Web Gui Preview](https://github.com/DAtanassov/SimpleQuizApp/HomePage.png)
+![Web Gui Preview](https://github.com/DAtanassov/SimpleQuizApp/blob/master/docs/HomePage.png)
 
 The page shows the available tests to solve,
 	a field for a file from which to import more Quizzes and a link
@@ -32,7 +32,7 @@ To start the Quiz, the user must mark the radio button in front of it
 	and press the "Start Quiz" button. You will be redirected to another page
 	with the questions and possible answers (each question has one possible answer).
 
-![Web Gui Preview](https://github.com/DAtanassov/SimpleQuizApp/Quiz.png)
+![Web Gui Preview](https://github.com/DAtanassov/SimpleQuizApp/blob/master/docs/Quiz.png)
 
 On the page you can see the name of the Quiz, below it a timer that counts down
 		the time for automatic completion of the Quiz depending on the number of questions
@@ -53,7 +53,7 @@ Below it are several buttons:
 	
 - "Submit Quiz" - sends the user's selection for processing and redirects to the page for visualizing the results
 
-![Web Gui Preview](https://github.com/DAtanassov/SimpleQuizApp/Results.png)
+![Web Gui Preview](https://github.com/DAtanassov/SimpleQuizApp/blob/master/docs/Results.png)
 
 The page displays:
 	
